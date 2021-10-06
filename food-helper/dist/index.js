@@ -37,10 +37,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var _a = require('bottender/router'), router = _a.router, text = _a.text;
+var axios = require('axios');
 function App(context) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            return [2 /*return*/, router([text(/(hi|hello)/i, SayHi), text('*', defaultReply)])];
+            return [2 /*return*/, router([
+                    text(/(hi|hello)/i, SayHi),
+                    text('台南', SendFood),
+                    text('高雄', SendFood),
+                    text('*', defaultReply),
+                ])];
         });
     });
 }
@@ -61,7 +67,7 @@ function defaultReply(context) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, context.sendText('聽不懂 = =')];
+                case 0: return [4 /*yield*/, context.sendText('聽不懂ㄟ = =')];
                 case 1:
                     _a.sent();
                     return [2 /*return*/];
@@ -69,3 +75,89 @@ function defaultReply(context) {
         });
     });
 }
+function SendFood(context) {
+    return __awaiter(this, void 0, void 0, function () {
+        var url, data;
+        var _this = this;
+        return __generator(this, function (_a) {
+            url = "http://localhost:8080/food/" + encodeURI(context.event.message.text);
+            data = [];
+            axios.get(url).then(function (res) { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            res.data.map(function (item) {
+                                data.push(FoodBubble(item));
+                            });
+                            return [4 /*yield*/, context.sendFlex('This is a carousel flex', {
+                                    type: 'carousel',
+                                    contents: data,
+                                })];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/];
+                    }
+                });
+            }); });
+            return [2 /*return*/];
+        });
+    });
+}
+var FoodBubble = function (item) {
+    return {
+        type: 'bubble',
+        hero: {
+            type: 'image',
+            url: 'https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png',
+            size: 'full',
+            aspectRatio: '20:13',
+        },
+        body: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
+                {
+                    type: 'text',
+                    text: item.name,
+                    weight: 'bold',
+                    size: 'xl',
+                },
+                {
+                    type: 'box',
+                    layout: 'vertical',
+                    margin: 'lg',
+                    contents: [
+                        {
+                            type: 'box',
+                            layout: 'baseline',
+                            contents: [
+                                {
+                                    type: 'text',
+                                    text: item.address,
+                                    wrap: true,
+                                    color: '#666666',
+                                    size: 'sm',
+                                    flex: 5,
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        footer: {
+            type: 'box',
+            layout: 'vertical',
+            contents: [
+                {
+                    type: 'button',
+                    action: {
+                        type: 'uri',
+                        label: 'Link',
+                        uri: item.link,
+                    },
+                },
+            ],
+        },
+    };
+};
